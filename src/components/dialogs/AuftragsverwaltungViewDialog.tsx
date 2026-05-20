@@ -1,0 +1,123 @@
+import type { Auftragsverwaltung, Kundenverwaltung, Motivkatalog } from '@/types/app';
+import { extractRecordId } from '@/services/livingAppsService';
+import {
+  Dialog, DialogContent, DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { IconPencil } from '@tabler/icons-react';
+import { format, parseISO } from 'date-fns';
+import { de } from 'date-fns/locale';
+
+function formatDate(d?: string) {
+  if (!d) return '—';
+  try { return format(parseISO(d), 'dd.MM.yyyy', { locale: de }); } catch { return d; }
+}
+
+interface AuftragsverwaltungViewDialogProps {
+  open: boolean;
+  onClose: () => void;
+  record: Auftragsverwaltung | null;
+  onEdit: (record: Auftragsverwaltung) => void;
+  kundenverwaltungList: Kundenverwaltung[];
+  motivkatalogList: Motivkatalog[];
+}
+
+export function AuftragsverwaltungViewDialog({ open, onClose, record, onEdit, kundenverwaltungList, motivkatalogList }: AuftragsverwaltungViewDialogProps) {
+  function getKundenverwaltungDisplayName(url?: unknown) {
+    if (!url) return '—';
+    const id = extractRecordId(url);
+    return kundenverwaltungList.find(r => r.record_id === id)?.fields.kundennummer ?? '—';
+  }
+
+  function getMotivkatalogDisplayName(url?: unknown) {
+    if (!url) return '—';
+    const id = extractRecordId(url);
+    return motivkatalogList.find(r => r.record_id === id)?.fields.motivname ?? '—';
+  }
+
+  if (!record) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Auftragsverwaltung anzeigen</DialogTitle>
+        </DialogHeader>
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => { onClose(); onEdit(record); }}>
+            <IconPencil className="h-3.5 w-3.5 mr-1.5" />
+            Bearbeiten
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Auftragsnummer</Label>
+            <p className="text-sm">{record.fields.auftragsnummer ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Auftragsdatum</Label>
+            <p className="text-sm">{formatDate(record.fields.auftragsdatum)}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Gewünschtes Lieferdatum</Label>
+            <p className="text-sm">{formatDate(record.fields.lieferdatum)}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Auftragsstatus</Label>
+            <Badge variant="secondary">{record.fields.auftragsstatus?.label ?? '—'}</Badge>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Kunde</Label>
+            <p className="text-sm">{getKundenverwaltungDisplayName(record.fields.kunde)}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Motive</Label>
+            {Array.isArray(record.fields.motive) && record.fields.motive.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {record.fields.motive.map((url: any, i: number) => (
+                  <span key={i} className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{getMotivkatalogDisplayName(url)}</span>
+                ))}
+              </div>
+            ) : <p className="text-sm">—</p>}
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Breite des Wandbildes (cm)</Label>
+            <p className="text-sm">{record.fields.breite_cm ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Höhe des Wandbildes (cm)</Label>
+            <p className="text-sm">{record.fields.hoehe_cm ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Druckort</Label>
+            <Badge variant="secondary">{record.fields.druckort?.label ?? '—'}</Badge>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Oberflächentyp</Label>
+            <p className="text-sm">{record.fields.oberflaechentyp ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Sonderanforderungen</Label>
+            <p className="text-sm whitespace-pre-wrap">{record.fields.sonderanforderungen ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Gesamtpreis (€)</Label>
+            <p className="text-sm">{record.fields.gesamtpreis ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Anzahlung (€)</Label>
+            <p className="text-sm">{record.fields.anzahlung ?? '—'}</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Zahlungsstatus</Label>
+            <Badge variant="secondary">{record.fields.zahlungsstatus?.label ?? '—'}</Badge>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

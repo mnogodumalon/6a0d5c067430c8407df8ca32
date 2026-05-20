@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Kundenverwaltung": {
+      "placeholders_set": 11,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten mit Text-, E-Mail- und Adressfeldern. Keine Number-Felder, keine Lookup-Abhängigkeiten, keine Datumsberechnungen. Keine berechenbaren Größen."
+    },
+    "Mitarbeiterverwaltung": {
+      "placeholders_set": 7,
+      "defaults_keys": ["eintrittsdatum", "position"],
+      "computed_keys": [],
+      "reason": "Stammdaten mit Datum und Lookup-Feld. Eintrittsdatum defaultet auf heute (Erfassungs-Semantik). Position defaultet auf erster Lookup-Option. Keine berechenbaren Größen."
+    },
+    "Motivkatalog": {
+      "placeholders_set": 9,
+      "defaults_keys": ["basispreis_pro_qm", "verfuegbar"],
+      "computed_keys": [],
+      "reason": "Katalog mit unabhängigen Dimensions- und Preis-Parametern. Keine Aggregationen oder Abhängigkeiten zwischen den Number-Feldern. Verfügbar-Flag defaultet auf true."
+    },
+    "Materialverwaltung": {
+      "placeholders_set": 8,
+      "defaults_keys": ["lagerbestand", "mindestbestand", "preis_pro_einheit"],
+      "computed_keys": [],
+      "reason": "Lagerverwaltung mit unabhängigen Number-Feldern (Bestand, Mindestbestand, Preis). Keine Produkt- oder Aggregationsberechnungen erforderlich."
+    },
+    "Auftragsverwaltung": {
+      "placeholders_set": 15,
+      "defaults_keys": ["auftragsdatum", "lieferdatum", "auftragsstatus", "zahlungsstatus"],
+      "computed_keys": ["_flaeche_qm", "gesamtpreis"],
+      "reason": "Kundenaufträge mit Dimensions-, Preis- und Datumfeldern. _flaeche_qm berechnet Wandbildfläche aus Breite×Höhe. gesamtpreis summiert über alle ausgewählten Motive: jedes Motiv × Fläche. Anzahlung bleibt manuell (Geschäftsentscheidung). Defaults auf Auftragsdatum, Lieferdatum +14 Tage, Statuses auf Neu/Offen."
+    },
+    "Produktionsplanung": {
+      "placeholders_set": 11,
+      "defaults_keys": ["geplanter_start", "geplantes_ende", "produktionsstatus"],
+      "computed_keys": ["_geplante_dauer_stunden", "_tatsaechliche_dauer_stunden"],
+      "reason": "Produktionsplanung mit vier Datetime-Feldern (geplant/tatsächlich Start/Ende). Zwei dateDiff-computed für die Dauern in Stunden (Aggregat-Anzeige). Defaults auf heute mit Zeit für geplanter_start, morgen mit Zeit für geplantes_ende. Produktionsstatus defaultet auf Geplant."
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "KundenverwaltungDialog.tsx": {
+    "kundennummer": "z. B. K-001234",
+    "vorname": "Vorname eingeben",
+    "nachname": "Nachname eingeben",
+    "firma": "Firmennummer oder Name",
+    "email": "max.mustermann@beispiel.de",
+    "strasse": "z. B. Hauptstraße",
+    "hausnummer": "z. B. 42",
+    "plz": "z. B. 12345",
+    "ort": "z. B. Berlin",
+    "land": "z. B. Deutschland",
+    "notizen": "Besonderheiten, Kontaktperson, Hinweise..."
+  },
+  "MitarbeiterverwaltungDialog.tsx": {
+    "personalnummer": "z. B. MA-001",
+    "vorname": "Vorname eingeben",
+    "nachname": "Nachname eingeben",
+    "position": "Wähle eine Position",
+    "eintrittsdatum": "Wann tritt der Mitarbeiter ein?",
+    "email": "max.mustermann@wandart.de",
+    "telefon": "z. B. +49 30 12345678",
+    "notizen": "Qualifikationen, Projekte, Notizen..."
+  },
+  "MotivkatalogDialog.tsx": {
+    "motivname": "z. B. Sonnenuntergang am Meer",
+    "beschreibung": "Motiv-Details, Stil, besondere Merkmale...",
+    "kategorie": "Wähle eine Kategorie",
+    "mindestbreite_cm": "z. B. 20",
+    "mindesthoehe_cm": "z. B. 20",
+    "maximalbreite_cm": "z. B. 300",
+    "maximalhoehe_cm": "z. B. 300",
+    "basispreis_pro_qm": "z. B. 49,99",
+    "verfuegbar": "Motiv verfügbar?"
+  },
+  "MaterialverwaltungDialog.tsx": {
+    "materialname": "z. B. Hochglanz-Druckfolie A3",
+    "materialtyp": "Wähle einen Materialtyp",
+    "einheit": "Wähle eine Einheit",
+    "lagerbestand": "z. B. 150",
+    "mindestbestand": "z. B. 50",
+    "lieferant": "z. B. PrintSupply GmbH",
+    "preis_pro_einheit": "z. B. 2,50",
+    "notizen": "Lagerlocation, Haltbarkeit, Spezifikationen..."
+  },
+  "AuftragsverwaltungDialog.tsx": {
+    "auftragsnummer": "z. B. AU-2026-001",
+    "auftragsdatum": "Wann wurde der Auftrag erteilt?",
+    "lieferdatum": "Gewünschtes Lieferdatum",
+    "auftragsstatus": "Status des Auftrags",
+    "kunde": "Welcher Kunde?",
+    "motive": "Welche Motive für das Wandbild?",
+    "breite_cm": "z. B. 120",
+    "hoehe_cm": "z. B. 80",
+    "druckort": "Wo soll es angebracht werden?",
+    "oberflaechentyp": "z. B. Acrylglas, Alu-Dibond",
+    "sonderanforderungen": "Spezielle Wünsche, Rahmen, Versand...",
+    "gesamtpreis": "z. B. 249,99",
+    "anzahlung": "z. B. 125,00",
+    "zahlungsstatus": "Zahlungsstatus"
+  },
+  "ProduktionsplanungDialog.tsx": {
+    "produktionsnummer": "z. B. PD-2026-001",
+    "produktionsstatus": "Wähle einen Status",
+    "auftrag": "Zu welchem Auftrag gehört dies?",
+    "mitarbeiter": "Wer ist verantwortlich?",
+    "materialien": "Welche Materialien sind nötig?",
+    "geplanter_start": "Wann soll es losgehen?",
+    "geplantes_ende": "Wann ist es fertig geplant?",
+    "tatsaechlicher_start": "Wann wurde tatsächlich gestartet?",
+    "tatsaechliches_ende": "Wann wurde es tatsächlich abgeschlossen?",
+    "drucker_bezeichnung": "z. B. Drucker-XL-500",
+    "qualitaetspruefung_bestanden": "Qualitätsprüfung bestanden?",
+    "notizen": "Probleme, Verzögerungen, Besonderheiten..."
+  }
+}
