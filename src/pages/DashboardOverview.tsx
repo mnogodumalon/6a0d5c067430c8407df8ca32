@@ -157,6 +157,26 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
+      {/* Workflow-Navigation */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="#/intents/auftrag-erstellen" className="flex items-center gap-4 bg-card border border-border border-l-4 border-l-primary rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow min-w-0 overflow-hidden">
+          <IconClipboardList size={24} className="text-primary shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold truncate">Neuen Auftrag erstellen</div>
+            <div className="text-sm text-muted-foreground truncate">Kunde auswählen, Motive wählen, Auftrag anlegen</div>
+          </div>
+          <IconChevronRight size={18} className="text-muted-foreground shrink-0" />
+        </a>
+        <a href="#/intents/produktion-starten" className="flex items-center gap-4 bg-card border border-border border-l-4 border-l-primary rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow min-w-0 overflow-hidden">
+          <IconTool size={24} className="text-primary shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold truncate">Produktion starten</div>
+            <div className="text-sm text-muted-foreground truncate">Auftrag → Mitarbeiter → Materialien → Produktionsplan</div>
+          </div>
+          <IconChevronRight size={18} className="text-muted-foreground shrink-0" />
+        </a>
+      </div>
+
       {/* KPI-Statistiken */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard

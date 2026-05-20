@@ -6,7 +6,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorBusProvider } from '@/components/ErrorBus';
 import { Layout } from '@/components/Layout';
 import DashboardOverview from '@/pages/DashboardOverview';
-import { WorkflowPlaceholders } from '@/components/WorkflowPlaceholders';
 import AdminPage from '@/pages/AdminPage';
 import KundenverwaltungPage from '@/pages/KundenverwaltungPage';
 import MitarbeiterverwaltungPage from '@/pages/MitarbeiterverwaltungPage';
@@ -23,6 +22,8 @@ import PublicFormProduktionsplanung from '@/pages/public/PublicForm_Produktionsp
 // <public:imports>
 // </public:imports>
 // <custom:imports>
+const AuftragErstellenPage = lazy(() => import('@/pages/intents/AuftragErstellenPage'));
+const ProduktionStartenPage = lazy(() => import('@/pages/intents/ProduktionStartenPage'));
 // </custom:imports>
 
 export default function App() {
@@ -41,7 +42,7 @@ export default function App() {
               {/* <public:routes> */}
               {/* </public:routes> */}
               <Route element={<Layout />}>
-                <Route index element={<><div className="mb-8"><WorkflowPlaceholders /></div><DashboardOverview /></>} />
+                <Route index element={<DashboardOverview />} />
                 <Route path="kundenverwaltung" element={<KundenverwaltungPage />} />
                 <Route path="mitarbeiterverwaltung" element={<MitarbeiterverwaltungPage />} />
                 <Route path="motivkatalog" element={<MotivkatalogPage />} />
@@ -50,6 +51,8 @@ export default function App() {
                 <Route path="produktionsplanung" element={<ProduktionsplanungPage />} />
                 <Route path="admin" element={<AdminPage />} />
                 {/* <custom:routes> */}
+                <Route path="intents/auftrag-erstellen" element={<Suspense fallback={null}><AuftragErstellenPage /></Suspense>} />
+                <Route path="intents/produktion-starten" element={<Suspense fallback={null}><ProduktionStartenPage /></Suspense>} />
                 {/* </custom:routes> */}
               </Route>
             </Routes>
