@@ -225,6 +225,7 @@ export default function MotivkatalogPage() {
         onClose={() => { setDialogOpen(false); setEditingRecord(null); }}
         onSubmit={editingRecord ? handleUpdate : handleCreate}
         defaultValues={editingRecord?.fields}
+        recordId={editingRecord?.record_id}
         enablePhotoScan={AI_PHOTO_SCAN['Motivkatalog']}
         enablePhotoLocation={AI_PHOTO_LOCATION['Motivkatalog']}
       />

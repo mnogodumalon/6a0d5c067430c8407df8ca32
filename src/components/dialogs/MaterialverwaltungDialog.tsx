@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Materialverwaltung';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem,
@@ -27,13 +28,26 @@ interface MaterialverwaltungDialogProps {
   onClose: () => void;
   onSubmit: (fields: Materialverwaltung['fields']) => Promise<void>;
   defaultValues?: Materialverwaltung['fields'];
+  /** Record id when editing — enables the attachments section. Omit on create. */
+  recordId?: string;
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
 }
 
-export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValues, enablePhotoScan = true, enablePhotoLocation = true }: MaterialverwaltungDialogProps) {
+export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValues, recordId, enablePhotoScan = true, enablePhotoLocation = true }: MaterialverwaltungDialogProps) {
   const [fields, setFields] = useState<Partial<Materialverwaltung['fields']>>({});
   const [saving, setSaving] = useState(false);
+  // Dirty-tracking: in edit-mode the Speichern button is disabled until the
+  // user actually changes something. JSON.stringify is good enough for our
+  // fields (plain values + LookupValue objects + string arrays).
+  const isDirty = useMemo(() => {
+    if (!defaultValues) return true;  // create-mode: always allow submit
+    try {
+      return JSON.stringify(fields) !== JSON.stringify(defaultValues);
+    } catch {
+      return true;
+    }
+  }, [fields, defaultValues]);
   const [aiOpen, setAiOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
@@ -233,7 +247,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="materialname">Materialname</Label>
         <Input
           id="materialname"
-          placeholder="z. B. Hochglanz-Druckfolie A3"
+          placeholder=""
           value={fields.materialname ?? ''}
           onChange={e => setFields(f => ({ ...f, materialname: e.target.value }))}
         />
@@ -246,7 +260,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
           value={lookupKey(fields.materialtyp) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, materialtyp: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="materialtyp"><SelectValue placeholder="Wähle einen Materialtyp" /></SelectTrigger>
+          <SelectTrigger id="materialtyp"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="druckfolie">Druckfolie</SelectItem>
@@ -266,7 +280,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
           value={lookupKey(fields.einheit) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, einheit: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="einheit"><SelectValue placeholder="Wähle eine Einheit" /></SelectTrigger>
+          <SelectTrigger id="einheit"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="liter">Liter</SelectItem>
@@ -287,7 +301,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'lagerbestand')}
-          placeholder="z. B. 150"
+          placeholder=""
           value={fields.lagerbestand !== undefined ? fields.lagerbestand : (computedValues['lagerbestand'] ?? '')}
           onChange={e => setFields(f => ({ ...f, lagerbestand: clampNumberValue(formEnhancements, 'lagerbestand', e.target.value) }))}
         />
@@ -301,7 +315,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'mindestbestand')}
-          placeholder="z. B. 50"
+          placeholder=""
           value={fields.mindestbestand !== undefined ? fields.mindestbestand : (computedValues['mindestbestand'] ?? '')}
           onChange={e => setFields(f => ({ ...f, mindestbestand: clampNumberValue(formEnhancements, 'mindestbestand', e.target.value) }))}
         />
@@ -312,7 +326,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="lieferant">Lieferant</Label>
         <Input
           id="lieferant"
-          placeholder="z. B. PrintSupply GmbH"
+          placeholder=""
           value={fields.lieferant ?? ''}
           onChange={e => setFields(f => ({ ...f, lieferant: e.target.value }))}
         />
@@ -326,7 +340,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'preis_pro_einheit')}
-          placeholder="z. B. 2,50"
+          placeholder=""
           value={fields.preis_pro_einheit !== undefined ? fields.preis_pro_einheit : (computedValues['preis_pro_einheit'] ?? '')}
           onChange={e => setFields(f => ({ ...f, preis_pro_einheit: clampNumberValue(formEnhancements, 'preis_pro_einheit', e.target.value) }))}
         />
@@ -337,7 +351,7 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="notizen">Notizen</Label>
         <Textarea
           id="notizen"
-          placeholder="Lagerlocation, Haltbarkeit, Spezifikationen..."
+          placeholder=""
           value={fields.notizen ?? ''}
           onChange={e => setFields(f => ({ ...f, notizen: e.target.value }))}
           rows={3}
@@ -698,12 +712,17 @@ export function MaterialverwaltungDialog({ open, onClose, onSubmit, defaultValue
                 })()}
               </div>
             )}
+            {recordId && (
+              <div className="pt-2 border-t border-border">
+                <AttachmentsSection appId={APP_IDS.MATERIALVERWALTUNG} recordId={recordId} />
+              </div>
+            )}
           </div>
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
             </Button>

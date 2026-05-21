@@ -281,6 +281,7 @@ export default function AuftragsverwaltungPage() {
         onClose={() => { setDialogOpen(false); setEditingRecord(null); }}
         onSubmit={editingRecord ? handleUpdate : handleCreate}
         defaultValues={editingRecord?.fields}
+        recordId={editingRecord?.record_id}
         kundenverwaltungList={kundenverwaltungList}
         motivkatalogList={motivkatalogList}
         enablePhotoScan={AI_PHOTO_SCAN['Auftragsverwaltung']}

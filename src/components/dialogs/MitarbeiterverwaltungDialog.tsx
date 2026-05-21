@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Mitarbeiterverwaltung';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem,
@@ -28,13 +29,26 @@ interface MitarbeiterverwaltungDialogProps {
   onClose: () => void;
   onSubmit: (fields: Mitarbeiterverwaltung['fields']) => Promise<void>;
   defaultValues?: Mitarbeiterverwaltung['fields'];
+  /** Record id when editing — enables the attachments section. Omit on create. */
+  recordId?: string;
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
 }
 
-export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultValues, enablePhotoScan = true, enablePhotoLocation = true }: MitarbeiterverwaltungDialogProps) {
+export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultValues, recordId, enablePhotoScan = true, enablePhotoLocation = true }: MitarbeiterverwaltungDialogProps) {
   const [fields, setFields] = useState<Partial<Mitarbeiterverwaltung['fields']>>({});
   const [saving, setSaving] = useState(false);
+  // Dirty-tracking: in edit-mode the Speichern button is disabled until the
+  // user actually changes something. JSON.stringify is good enough for our
+  // fields (plain values + LookupValue objects + string arrays).
+  const isDirty = useMemo(() => {
+    if (!defaultValues) return true;  // create-mode: always allow submit
+    try {
+      return JSON.stringify(fields) !== JSON.stringify(defaultValues);
+    } catch {
+      return true;
+    }
+  }, [fields, defaultValues]);
   const [aiOpen, setAiOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
@@ -234,7 +248,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Label htmlFor="personalnummer">Personalnummer</Label>
         <Input
           id="personalnummer"
-          placeholder="z. B. MA-001"
+          placeholder=""
           value={fields.personalnummer ?? ''}
           onChange={e => setFields(f => ({ ...f, personalnummer: e.target.value }))}
         />
@@ -245,7 +259,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Label htmlFor="vorname">Vorname</Label>
         <Input
           id="vorname"
-          placeholder="Vorname eingeben"
+          placeholder=""
           value={fields.vorname ?? ''}
           onChange={e => setFields(f => ({ ...f, vorname: e.target.value }))}
         />
@@ -256,7 +270,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Label htmlFor="nachname">Nachname</Label>
         <Input
           id="nachname"
-          placeholder="Nachname eingeben"
+          placeholder=""
           value={fields.nachname ?? ''}
           onChange={e => setFields(f => ({ ...f, nachname: e.target.value }))}
         />
@@ -269,7 +283,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
           value={lookupKey(fields.position) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, position: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="position"><SelectValue placeholder="Wähle eine Position" /></SelectTrigger>
+          <SelectTrigger id="position"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="drucker">Drucker / Druckerin</SelectItem>
@@ -288,7 +302,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Label htmlFor="eintrittsdatum">Eintrittsdatum</Label>
         <DatePicker
           id="eintrittsdatum"
-          placeholder="Wann tritt der Mitarbeiter ein?"
+          placeholder=""
           mode="date"
           value={fields.eintrittsdatum ?? null}
           onChange={v => setFields(f => ({ ...f, eintrittsdatum: v ?? undefined }))}
@@ -301,7 +315,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Input
           id="email"
           type="email"
-          placeholder="max.mustermann@wandart.de"
+          placeholder=""
           value={fields.email ?? ''}
           onChange={e => setFields(f => ({ ...f, email: e.target.value }))}
         />
@@ -322,7 +336,7 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
         <Label htmlFor="notizen">Notizen</Label>
         <Textarea
           id="notizen"
-          placeholder="Qualifikationen, Projekte, Notizen..."
+          placeholder=""
           value={fields.notizen ?? ''}
           onChange={e => setFields(f => ({ ...f, notizen: e.target.value }))}
           rows={3}
@@ -683,12 +697,17 @@ export function MitarbeiterverwaltungDialog({ open, onClose, onSubmit, defaultVa
                 })()}
               </div>
             )}
+            {recordId && (
+              <div className="pt-2 border-t border-border">
+                <AttachmentsSection appId={APP_IDS.MITARBEITERVERWALTUNG} recordId={recordId} />
+              </div>
+            )}
           </div>
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
             </Button>

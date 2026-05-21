@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Produktionsplanung';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Textarea } from '@/components/ui/textarea';
 import { Combobox, MultiCombobox } from '@/components/Combobox';
 import { AuftragsverwaltungDialog } from '@/components/dialogs/AuftragsverwaltungDialog';
@@ -28,6 +29,8 @@ interface ProduktionsplanungDialogProps {
   onClose: () => void;
   onSubmit: (fields: Produktionsplanung['fields']) => Promise<void>;
   defaultValues?: Produktionsplanung['fields'];
+  /** Record id when editing — enables the attachments section. Omit on create. */
+  recordId?: string;
   auftragsverwaltungList: Auftragsverwaltung[];
   mitarbeiterverwaltungList: Mitarbeiterverwaltung[];
   materialverwaltungList: Materialverwaltung[];
@@ -35,9 +38,20 @@ interface ProduktionsplanungDialogProps {
   enablePhotoLocation?: boolean;
 }
 
-export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValues, auftragsverwaltungList, mitarbeiterverwaltungList, materialverwaltungList, enablePhotoScan = true, enablePhotoLocation = true }: ProduktionsplanungDialogProps) {
+export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValues, recordId, auftragsverwaltungList, mitarbeiterverwaltungList, materialverwaltungList, enablePhotoScan = true, enablePhotoLocation = true }: ProduktionsplanungDialogProps) {
   const [fields, setFields] = useState<Partial<Produktionsplanung['fields']>>({});
   const [saving, setSaving] = useState(false);
+  // Dirty-tracking: in edit-mode the Speichern button is disabled until the
+  // user actually changes something. JSON.stringify is good enough for our
+  // fields (plain values + LookupValue objects + string arrays).
+  const isDirty = useMemo(() => {
+    if (!defaultValues) return true;  // create-mode: always allow submit
+    try {
+      return JSON.stringify(fields) !== JSON.stringify(defaultValues);
+    } catch {
+      return true;
+    }
+  }, [fields, defaultValues]);
   // Inline-Create state for "Auftragsverwaltung" target. The dropdown's
   // "+ Neuer …" option opens a sub-dialog; on submit we POST, add the new
   // record to the local `extraAuftragsverwaltung` list, and select it in
@@ -311,7 +325,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="produktionsnummer">Produktionsnummer</Label>
         <Input
           id="produktionsnummer"
-          placeholder="z. B. PD-2026-001"
+          placeholder=""
           value={fields.produktionsnummer ?? ''}
           onChange={e => setFields(f => ({ ...f, produktionsnummer: e.target.value }))}
         />
@@ -394,7 +408,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="auftrag">Auftrag</Label>
         <Combobox
           id="auftrag"
-          placeholder="Zu welchem Auftrag gehört dies?"
+          placeholder=""
           items={auftragsverwaltungListAll.map(r => ({
             id: r.record_id,
             label: String(r.fields.auftragsnummer ?? r.record_id),
@@ -413,7 +427,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="mitarbeiter">Verantwortlicher Mitarbeiter</Label>
         <Combobox
           id="mitarbeiter"
-          placeholder="Wer ist verantwortlich?"
+          placeholder=""
           items={mitarbeiterverwaltungListAll.map(r => ({
             id: r.record_id,
             label: String(r.fields.personalnummer ?? r.record_id),
@@ -432,7 +446,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="materialien">Materialien</Label>
         <MultiCombobox
           id="materialien"
-          placeholder="Welche Materialien sind nötig?"
+          placeholder=""
           items={materialverwaltungListAll.map(r => ({
             id: r.record_id,
             label: String(r.fields.materialname ?? r.record_id),
@@ -451,7 +465,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="geplanter_start">Geplanter Starttermin</Label>
         <DatePicker
           id="geplanter_start"
-          placeholder="Wann soll es losgehen?"
+          placeholder=""
           mode="datetime"
           value={fields.geplanter_start ?? null}
           onChange={v => setFields(f => ({ ...f, geplanter_start: v ?? undefined }))}
@@ -463,7 +477,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="geplantes_ende">Geplanter Endtermin</Label>
         <DatePicker
           id="geplantes_ende"
-          placeholder="Wann ist es fertig geplant?"
+          placeholder=""
           mode="datetime"
           value={fields.geplantes_ende ?? null}
           onChange={v => setFields(f => ({ ...f, geplantes_ende: v ?? undefined }))}
@@ -475,7 +489,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="tatsaechlicher_start">Tatsächlicher Starttermin</Label>
         <DatePicker
           id="tatsaechlicher_start"
-          placeholder="Wann wurde tatsächlich gestartet?"
+          placeholder=""
           mode="datetime"
           value={fields.tatsaechlicher_start ?? null}
           onChange={v => setFields(f => ({ ...f, tatsaechlicher_start: v ?? undefined }))}
@@ -487,7 +501,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="tatsaechliches_ende">Tatsächlicher Endtermin</Label>
         <DatePicker
           id="tatsaechliches_ende"
-          placeholder="Wann wurde es tatsächlich abgeschlossen?"
+          placeholder=""
           mode="datetime"
           value={fields.tatsaechliches_ende ?? null}
           onChange={v => setFields(f => ({ ...f, tatsaechliches_ende: v ?? undefined }))}
@@ -499,7 +513,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="drucker_bezeichnung">Verwendeter Drucker</Label>
         <Input
           id="drucker_bezeichnung"
-          placeholder="z. B. Drucker-XL-500"
+          placeholder=""
           value={fields.drucker_bezeichnung ?? ''}
           onChange={e => setFields(f => ({ ...f, drucker_bezeichnung: e.target.value }))}
         />
@@ -523,7 +537,7 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
         <Label htmlFor="notizen">Notizen zur Produktion</Label>
         <Textarea
           id="notizen"
-          placeholder="Probleme, Verzögerungen, Besonderheiten..."
+          placeholder=""
           value={fields.notizen ?? ''}
           onChange={e => setFields(f => ({ ...f, notizen: e.target.value }))}
           rows={3}
@@ -884,12 +898,17 @@ export function ProduktionsplanungDialog({ open, onClose, onSubmit, defaultValue
                 })()}
               </div>
             )}
+            {recordId && (
+              <div className="pt-2 border-t border-border">
+                <AttachmentsSection appId={APP_IDS.PRODUKTIONSPLANUNG} recordId={recordId} />
+              </div>
+            )}
           </div>
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
             </Button>

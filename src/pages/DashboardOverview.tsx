@@ -513,6 +513,7 @@ export default function DashboardOverview() {
         onClose={() => { setAuftragDialogOpen(false); setEditAuftrag(null); }}
         onSubmit={editAuftrag ? handleEditAuftrag : handleCreateAuftrag}
         defaultValues={editAuftrag?.fields}
+        recordId={editAuftrag?.record_id}
         kundenverwaltungList={kundenverwaltung}
         motivkatalogList={motivkatalog}
         enablePhotoScan={AI_PHOTO_SCAN['Auftragsverwaltung']}
@@ -533,6 +534,7 @@ export default function DashboardOverview() {
         onClose={() => { setProdDialogOpen(false); setEditProd(null); }}
         onSubmit={editProd ? handleEditProd : handleCreateProd}
         defaultValues={editProd?.fields}
+        recordId={editProd?.record_id}
         auftragsverwaltungList={auftragsverwaltung}
         mitarbeiterverwaltungList={mitarbeiterverwaltung}
         materialverwaltungList={materialverwaltung}

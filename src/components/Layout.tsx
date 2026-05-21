@@ -108,7 +108,7 @@ export function Layout() {
         </main>
       </div>
 
-      {!IS_EMBED && <ChatWidget />}
+      <ChatWidget />
 
       {inputFormAction && inputFormAction.metadata?.input_schema && (
         <ActionInputDialog

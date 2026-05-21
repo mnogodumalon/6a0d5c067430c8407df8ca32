@@ -3,6 +3,24 @@
 export type LookupValue = { key: string; label: string };
 export type GeoLocation = { lat: number; long: number; info?: string };
 
+export type AttachmentType = 'file' | 'note' | 'url' | 'json';
+export interface Attachment {
+  id: string;
+  type: AttachmentType;
+  label: string | null;
+  value: string | null;
+  active: boolean;
+  createdat?: string | null;
+  updatedat?: string | null;
+}
+
+export interface AttachmentInput {
+  type: AttachmentType;
+  label?: string;
+  value: string;
+  active?: boolean;
+}
+
 export interface Kundenverwaltung {
   record_id: string;
   createdat: string;

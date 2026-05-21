@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Kundenverwaltung';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { IconCamera, IconChevronDown, IconCircleCheck, IconClipboard, IconFileText, IconLoader2, IconPhotoPlus, IconSparkles, IconUpload, IconX } from '@tabler/icons-react';
@@ -22,13 +23,26 @@ interface KundenverwaltungDialogProps {
   onClose: () => void;
   onSubmit: (fields: Kundenverwaltung['fields']) => Promise<void>;
   defaultValues?: Kundenverwaltung['fields'];
+  /** Record id when editing — enables the attachments section. Omit on create. */
+  recordId?: string;
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
 }
 
-export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues, enablePhotoScan = true, enablePhotoLocation = true }: KundenverwaltungDialogProps) {
+export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues, recordId, enablePhotoScan = true, enablePhotoLocation = true }: KundenverwaltungDialogProps) {
   const [fields, setFields] = useState<Partial<Kundenverwaltung['fields']>>({});
   const [saving, setSaving] = useState(false);
+  // Dirty-tracking: in edit-mode the Speichern button is disabled until the
+  // user actually changes something. JSON.stringify is good enough for our
+  // fields (plain values + LookupValue objects + string arrays).
+  const isDirty = useMemo(() => {
+    if (!defaultValues) return true;  // create-mode: always allow submit
+    try {
+      return JSON.stringify(fields) !== JSON.stringify(defaultValues);
+    } catch {
+      return true;
+    }
+  }, [fields, defaultValues]);
   const [aiOpen, setAiOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
@@ -228,7 +242,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="kundennummer">Kundennummer</Label>
         <Input
           id="kundennummer"
-          placeholder="z. B. K-001234"
+          placeholder=""
           value={fields.kundennummer ?? ''}
           onChange={e => setFields(f => ({ ...f, kundennummer: e.target.value }))}
         />
@@ -239,7 +253,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="vorname">Vorname</Label>
         <Input
           id="vorname"
-          placeholder="Vorname eingeben"
+          placeholder=""
           value={fields.vorname ?? ''}
           onChange={e => setFields(f => ({ ...f, vorname: e.target.value }))}
         />
@@ -250,7 +264,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="nachname">Nachname</Label>
         <Input
           id="nachname"
-          placeholder="Nachname eingeben"
+          placeholder=""
           value={fields.nachname ?? ''}
           onChange={e => setFields(f => ({ ...f, nachname: e.target.value }))}
         />
@@ -261,7 +275,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="firma">Firma</Label>
         <Input
           id="firma"
-          placeholder="Firmennummer oder Name"
+          placeholder=""
           value={fields.firma ?? ''}
           onChange={e => setFields(f => ({ ...f, firma: e.target.value }))}
         />
@@ -273,7 +287,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Input
           id="email"
           type="email"
-          placeholder="max.mustermann@beispiel.de"
+          placeholder=""
           value={fields.email ?? ''}
           onChange={e => setFields(f => ({ ...f, email: e.target.value }))}
         />
@@ -294,7 +308,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="strasse">Straße</Label>
         <Input
           id="strasse"
-          placeholder="z. B. Hauptstraße"
+          placeholder=""
           value={fields.strasse ?? ''}
           onChange={e => setFields(f => ({ ...f, strasse: e.target.value }))}
         />
@@ -305,7 +319,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="hausnummer">Hausnummer</Label>
         <Input
           id="hausnummer"
-          placeholder="z. B. 42"
+          placeholder=""
           value={fields.hausnummer ?? ''}
           onChange={e => setFields(f => ({ ...f, hausnummer: e.target.value }))}
         />
@@ -316,7 +330,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="plz">Postleitzahl</Label>
         <Input
           id="plz"
-          placeholder="z. B. 12345"
+          placeholder=""
           value={fields.plz ?? ''}
           onChange={e => setFields(f => ({ ...f, plz: e.target.value }))}
         />
@@ -327,7 +341,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="ort">Ort</Label>
         <Input
           id="ort"
-          placeholder="z. B. Berlin"
+          placeholder=""
           value={fields.ort ?? ''}
           onChange={e => setFields(f => ({ ...f, ort: e.target.value }))}
         />
@@ -338,7 +352,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="land">Land</Label>
         <Input
           id="land"
-          placeholder="z. B. Deutschland"
+          placeholder=""
           value={fields.land ?? ''}
           onChange={e => setFields(f => ({ ...f, land: e.target.value }))}
         />
@@ -349,7 +363,7 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="notizen">Notizen</Label>
         <Textarea
           id="notizen"
-          placeholder="Besonderheiten, Kontaktperson, Hinweise..."
+          placeholder=""
           value={fields.notizen ?? ''}
           onChange={e => setFields(f => ({ ...f, notizen: e.target.value }))}
           rows={3}
@@ -710,12 +724,17 @@ export function KundenverwaltungDialog({ open, onClose, onSubmit, defaultValues,
                 })()}
               </div>
             )}
+            {recordId && (
+              <div className="pt-2 border-t border-border">
+                <AttachmentsSection appId={APP_IDS.KUNDENVERWALTUNG} recordId={recordId} />
+              </div>
+            )}
           </div>
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
             </Button>

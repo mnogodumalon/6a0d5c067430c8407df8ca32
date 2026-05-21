@@ -276,6 +276,7 @@ export default function ProduktionsplanungPage() {
         onClose={() => { setDialogOpen(false); setEditingRecord(null); }}
         onSubmit={editingRecord ? handleUpdate : handleCreate}
         defaultValues={editingRecord?.fields}
+        recordId={editingRecord?.record_id}
         auftragsverwaltungList={auftragsverwaltungList}
         mitarbeiterverwaltungList={mitarbeiterverwaltungList}
         materialverwaltungList={materialverwaltungList}

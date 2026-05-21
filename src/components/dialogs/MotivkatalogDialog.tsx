@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Motivkatalog';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem,
@@ -27,13 +28,26 @@ interface MotivkatalogDialogProps {
   onClose: () => void;
   onSubmit: (fields: Motivkatalog['fields']) => Promise<void>;
   defaultValues?: Motivkatalog['fields'];
+  /** Record id when editing — enables the attachments section. Omit on create. */
+  recordId?: string;
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
 }
 
-export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, enablePhotoScan = true, enablePhotoLocation = true }: MotivkatalogDialogProps) {
+export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, recordId, enablePhotoScan = true, enablePhotoLocation = true }: MotivkatalogDialogProps) {
   const [fields, setFields] = useState<Partial<Motivkatalog['fields']>>({});
   const [saving, setSaving] = useState(false);
+  // Dirty-tracking: in edit-mode the Speichern button is disabled until the
+  // user actually changes something. JSON.stringify is good enough for our
+  // fields (plain values + LookupValue objects + string arrays).
+  const isDirty = useMemo(() => {
+    if (!defaultValues) return true;  // create-mode: always allow submit
+    try {
+      return JSON.stringify(fields) !== JSON.stringify(defaultValues);
+    } catch {
+      return true;
+    }
+  }, [fields, defaultValues]);
   const [aiOpen, setAiOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
@@ -243,7 +257,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
         <Label htmlFor="motivname">Motivname</Label>
         <Input
           id="motivname"
-          placeholder="z. B. Sonnenuntergang am Meer"
+          placeholder=""
           value={fields.motivname ?? ''}
           onChange={e => setFields(f => ({ ...f, motivname: e.target.value }))}
         />
@@ -254,7 +268,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
         <Label htmlFor="beschreibung">Beschreibung</Label>
         <Textarea
           id="beschreibung"
-          placeholder="Motiv-Details, Stil, besondere Merkmale..."
+          placeholder=""
           value={fields.beschreibung ?? ''}
           onChange={e => setFields(f => ({ ...f, beschreibung: e.target.value }))}
           rows={3}
@@ -268,7 +282,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           value={lookupKey(fields.kategorie) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, kategorie: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="kategorie"><SelectValue placeholder="Wähle eine Kategorie" /></SelectTrigger>
+          <SelectTrigger id="kategorie"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="natur">Natur</SelectItem>
@@ -360,7 +374,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'mindestbreite_cm')}
-          placeholder="z. B. 20"
+          placeholder=""
           value={fields.mindestbreite_cm !== undefined ? fields.mindestbreite_cm : (computedValues['mindestbreite_cm'] ?? '')}
           onChange={e => setFields(f => ({ ...f, mindestbreite_cm: clampNumberValue(formEnhancements, 'mindestbreite_cm', e.target.value) }))}
         />
@@ -374,7 +388,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'mindesthoehe_cm')}
-          placeholder="z. B. 20"
+          placeholder=""
           value={fields.mindesthoehe_cm !== undefined ? fields.mindesthoehe_cm : (computedValues['mindesthoehe_cm'] ?? '')}
           onChange={e => setFields(f => ({ ...f, mindesthoehe_cm: clampNumberValue(formEnhancements, 'mindesthoehe_cm', e.target.value) }))}
         />
@@ -388,7 +402,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'maximalbreite_cm')}
-          placeholder="z. B. 300"
+          placeholder=""
           value={fields.maximalbreite_cm !== undefined ? fields.maximalbreite_cm : (computedValues['maximalbreite_cm'] ?? '')}
           onChange={e => setFields(f => ({ ...f, maximalbreite_cm: clampNumberValue(formEnhancements, 'maximalbreite_cm', e.target.value) }))}
         />
@@ -402,7 +416,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'maximalhoehe_cm')}
-          placeholder="z. B. 300"
+          placeholder=""
           value={fields.maximalhoehe_cm !== undefined ? fields.maximalhoehe_cm : (computedValues['maximalhoehe_cm'] ?? '')}
           onChange={e => setFields(f => ({ ...f, maximalhoehe_cm: clampNumberValue(formEnhancements, 'maximalhoehe_cm', e.target.value) }))}
         />
@@ -416,7 +430,7 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'basispreis_pro_qm')}
-          placeholder="z. B. 49,99"
+          placeholder=""
           value={fields.basispreis_pro_qm !== undefined ? fields.basispreis_pro_qm : (computedValues['basispreis_pro_qm'] ?? '')}
           onChange={e => setFields(f => ({ ...f, basispreis_pro_qm: clampNumberValue(formEnhancements, 'basispreis_pro_qm', e.target.value) }))}
         />
@@ -789,12 +803,17 @@ export function MotivkatalogDialog({ open, onClose, onSubmit, defaultValues, ena
                 })()}
               </div>
             )}
+            {recordId && (
+              <div className="pt-2 border-t border-border">
+                <AttachmentsSection appId={APP_IDS.MOTIVKATALOG} recordId={recordId} />
+              </div>
+            )}
           </div>
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !isDirty}
             >
               {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
             </Button>

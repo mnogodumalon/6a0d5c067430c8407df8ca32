@@ -211,6 +211,7 @@ export default function MaterialverwaltungPage() {
         onClose={() => { setDialogOpen(false); setEditingRecord(null); }}
         onSubmit={editingRecord ? handleUpdate : handleCreate}
         defaultValues={editingRecord?.fields}
+        recordId={editingRecord?.record_id}
         enablePhotoScan={AI_PHOTO_SCAN['Materialverwaltung']}
         enablePhotoLocation={AI_PHOTO_LOCATION['Materialverwaltung']}
       />

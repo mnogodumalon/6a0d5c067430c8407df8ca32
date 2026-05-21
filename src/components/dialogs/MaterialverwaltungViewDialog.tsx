@@ -5,6 +5,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { APP_IDS } from '@/types/app';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Badge } from '@/components/ui/badge';
 import { IconPencil } from '@tabler/icons-react';
 
@@ -63,6 +65,9 @@ export function MaterialverwaltungViewDialog({ open, onClose, record, onEdit }: 
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Notizen</Label>
             <p className="text-sm whitespace-pre-wrap">{record.fields.notizen ?? '—'}</p>
+          </div>
+          <div className="pt-2 border-t border-border">
+            <AttachmentsSection appId={APP_IDS.MATERIALVERWALTUNG} recordId={record.record_id} readOnly />
           </div>
         </div>
       </DialogContent>
